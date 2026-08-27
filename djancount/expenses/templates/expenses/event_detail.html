@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Bilan de l'Événement</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
+        h1, h2 { color: #2c3e50; }
+        .summary { background-color: #f1f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .positive { color: green; font-weight: bold; }
+        .negative { color: red; font-weight: bold; }
+        ul { line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+    <h1>Bilan Financier</h1>
+
+    <div class="summary">
+        <h2>Résumé</h2>
+        <p><strong>Total des dépenses :</strong> {{ total }} €</p>
+        <p><strong>Part théorique par personne :</strong> {{ part }} €</p>
+    </div>
+
+    <h2>Détail des dépenses</h2>
+    <ul>
+        {% for expense in expenses %}
+            <li><strong>{{ expense.title }}</strong> : {{ expense.amount }} € payé par <em>{{ expense.payer }}</em></li>
+        {% endfor %}
+    </ul>
+
+    <h2>Solde de chaque participant</h2>
+    <ul>
+        {% for nom, solde in balances.items %}
+            <li>
+                {{ nom }} : 
+                {% if solde > 0 %}
+                    <span class="positive">+{{ solde }} €</span>
+                {% elif solde < 0 %}
+                    <span class="negative">{{ solde }} €</span>
+                {% else %}
+                    0 €
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h2>Qui doit combien à qui ?</h2>
+    <ul>
+        {% for transaction in transactions %}
+            <li><strong>{{ transaction.from }}</strong> doit <strong>{{ transaction.amount }} €</strong> à <strong>{{ transaction.to }}</strong></li>
+        {% empty %}
+            <li>Les comptes sont parfaitement à l'équilibre !</li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>

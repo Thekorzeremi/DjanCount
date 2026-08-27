@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import EventViewSet, ExpenseViewSet
+from .views import EventViewSet, ExpenseViewSet, event_detail_view
 
 # ==============================================================================
 # 🔀 ROUTAGE API REST (Membre 2)
@@ -11,5 +11,6 @@ router.register(r'events', EventViewSet, basename='event')
 router.register(r'expenses', ExpenseViewSet, basename='expense')
 
 urlpatterns = [
+    path('event/<int:event_id>/', event_detail_view, name='event_detail'),
     path('api/', include(router.urls)),
 ]
