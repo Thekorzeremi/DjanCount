@@ -52,7 +52,7 @@ Chaque membre travaille sur sa branche Git et son propre domaine Django sans att
 └─────────────────┘ └───────────────┘     └──────────────────┘ └─────────────────┘
 ```
 
-### 👨‍💻 Membre 1 : Core Django, Modèles, Admin & Fixtures
+### 👨‍💻 Membre 1 Julie : Core Django, Modèles, Admin & Fixtures
 * **Branche Git** : `feature/models-admin`
 * **Fichiers clés** : `expenses/models.py`, `expenses/admin.py`, `seed.py` (ou `fixtures.json`)
 * **Missions** :
@@ -61,7 +61,7 @@ Chaque membre travaille sur sa branche Git et son propre domaine Django sans att
   - Créer un script `seed.py` / fixture pour injecter des utilisateurs, événements et dépenses de démonstration.
 * **Ingrédients du rapport individuel** : Modélisation des données ORM Django, relations ForeignKey/ManyToManyField, configuration de l'Admin Django.
 
-### 👨‍💻 Membre 2 : API REST (DRF), Sérialiseurs & Validation Métier
+### 👨‍💻 Membre 2 Seer : API REST (DRF), Sérialiseurs & Validation Métier
 * **Branche Git** : `feature/api-serializers`
 * **Fichiers clés** : `expenses/serializers.py`, `expenses/views.py` (ViewSets), `djancount/urls.py`
 * **Missions** :
@@ -72,7 +72,7 @@ Chaque membre travaille sur sa branche Git et son propre domaine Django sans att
   - Créer `EventViewSet` (lecture/création) et `ExpenseViewSet` (CRUD complet) et les enregistrer dans un `DefaultRouter`.
 * **Ingrédients du rapport individuel** : Django REST Framework, sérialisation des données, règles de validation métier.
 
-### 👨‍💻 Membre 3 : Authentification JWT & Permissions DRF
+### 👨‍💻 Membre 3 Conambot : Authentification JWT & Permissions DRF
 * **Branche Git** : `feature/jwt-security`
 * **Fichiers clés** : `djancount/settings.py`, `djancount/urls.py`, `expenses/permissions.py`
 * **Missions** :
@@ -82,7 +82,7 @@ Chaque membre travaille sur sa branche Git et son propre domaine Django sans att
   - Préparer et documenter les requêtes de test Postman / HTTP client pour l'équipe.
 * **Ingrédients du rapport individuel** : Authentification stateless JWT, middleware/sécurité Django, système de permissions DRF.
 
-### 👨‍💻 Membre 4 : Vue HTML, Template & Algorithme du Bilan Financier
+### 👨‍💻 Membre 4 Rémi : Vue HTML, Template & Algorithme du Bilan Financier
 * **Branche Git** : `feature/html-bilan`
 * **Fichiers clés** : `expenses/views.py` (vue classique), `expenses/templates/expenses/event_detail.html`
 * **Missions** :
