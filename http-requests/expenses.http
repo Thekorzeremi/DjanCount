@@ -1,0 +1,66 @@
+@baseUrl = http://127.0.0.1:8000
+
+### 1. Lister toutes les dépenses (GET)
+GET {{baseUrl}}/api/expenses/
+Accept: application/json
+
+### 2. Obtenir le détail d'une dépense (GET)
+GET {{baseUrl}}/api/expenses/1/
+Accept: application/json
+
+### 3. Créer une nouvelle dépense valide (POST)
+# Payeur : 5 (Seer), Événement : 2 (Week-end Biarritz Équipe)
+POST {{baseUrl}}/api/expenses/
+Content-Type: application/json
+
+{
+    "title": "Achat boissons & café",
+    "amount": 24.50,
+    "payer": 5,
+    "event": 2
+}
+
+### 4. TEST ERREUR 400 : Montant négatif ou nul (Validation validate_amount)
+POST {{baseUrl}}/api/expenses/
+Content-Type: application/json
+
+{
+    "title": "Dépense négative invalide",
+    "amount": -15.00,
+    "payer": 5,
+    "event": 2
+}
+
+### 5. TEST ERREUR 400 : Payeur non-participant à l'événement (Validation validate)
+# Utilisateur 5 (Seer) n'est pas participant à l'Événement 1 (qui contient Alice=2, Bob=3, Chloé=4)
+POST {{baseUrl}}/api/expenses/
+Content-Type: application/json
+
+{
+    "title": "Paiement non autorisé",
+    "amount": 50.00,
+    "payer": 5,
+    "event": 1
+}
+
+### 6. Modifier une dépense (PUT)
+PUT {{baseUrl}}/api/expenses/4/
+Content-Type: application/json
+
+{
+    "title": "Péage et Essence (Reçu officiel)",
+    "amount": 68.90,
+    "payer": 5,
+    "event": 2
+}
+
+### 7. Modification partielle d'une dépense (PATCH)
+PATCH {{baseUrl}}/api/expenses/4/
+Content-Type: application/json
+
+{
+    "amount": 70.00
+}
+
+### 8. Supprimer une dépense (DELETE)
+DELETE {{baseUrl}}/api/expenses/7/
