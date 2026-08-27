@@ -14,3 +14,4 @@ class ExpenseAdmin(admin.ModelAdmin):
     list_display = ("title", "amount", "payer", "event", "date")
     list_filter = ("event", "payer")
     search_fields = ("title",)
+
