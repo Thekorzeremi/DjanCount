@@ -1,9 +1,9 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from .models import Event, Expense
 
 
 class EventSerializer(serializers.ModelSerializer):
-
     """
     Sérialiseur pour le modèle Event.
     Gère la conversion JSON des événements et inclut des champs calculés
@@ -57,5 +57,4 @@ class ExpenseSerializer(serializers.ModelSerializer):
                 {"payer": "Le payeur doit faire partie des participants de cet événement."}
             )
         return attrs
-
 
