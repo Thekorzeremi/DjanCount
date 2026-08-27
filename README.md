@@ -167,8 +167,10 @@ Tous les endpoints API sont enregistrés sous le préfixe `/api/` :
 
 ---
 
-## 📄 7. Rapports de Contribution
+## 📄 7. Rapports Individuels de Contribution
 
-Les rapports individuels de contribution pour la soutenance se trouvent dans le dossier [`docs/`](docs/) :
-- [`docs/RAPPORT_SEER.md`](docs/RAPPORT_SEER.md)
-- [`docs/RAPPORT_REMI.md`](docs/RAPPORT_REMI.md)
+Les 4 rapports individuels de contribution pour la soutenance sont disponibles dans le dossier [`docs/`](docs/) :
+- [`docs/RAPPORT_SEER.md`](docs/RAPPORT_SEER.md) *(Seer MENSAH ASSIAKOLEY - API REST DRF & Validations)*
+- [`docs/RAPPORT_REMI.md`](docs/RAPPORT_REMI.md) *(Rémi KORZENIOWSKI - Vue HTML & Algorithme du Bilan)*
+- [`docs/RAPPORT_JULIE.md`](docs/RAPPORT_JULIE.md) *(Julie SAINT MARTIN - Core Django, ORM & Admin)*
+- [`docs/RAPPORT_CONAMBOT.md`](docs/RAPPORT_CONAMBOT.md) *(Conambot NGUESSAN - SimpleJWT & Permissions)*
