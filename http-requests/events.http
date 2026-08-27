@@ -1,0 +1,41 @@
+@baseUrl = http://127.0.0.1:8000
+
+### 1. Lister tous les événements (GET)
+GET {{baseUrl}}/api/events/
+Accept: application/json
+
+### 2. Obtenir le détail d'un événement (GET)
+GET {{baseUrl}}/api/events/1/
+Accept: application/json
+
+### 3. Créer un nouvel événement avec les 4 membres de l'équipe (POST)
+# Utilisateurs : 5 (Seer), 6 (Julie), 7 (Conambot), 8 (Rémi)
+POST {{baseUrl}}/api/events/
+Content-Type: application/json
+
+{
+    "name": "Hackathon Django IPSSI",
+    "description": "Journée de dev intense en équipe de 4",
+    "participants": [5, 6, 7, 8]
+}
+
+### 4. Modifier un événement existant (PUT)
+PUT {{baseUrl}}/api/events/2/
+Content-Type: application/json
+
+{
+    "name": "Week-end Biarritz Équipe (Mise à jour)",
+    "description": "Séjour prolongé en équipe de dev",
+    "participants": [5, 6, 7, 8]
+}
+
+### 5. Modification partielle d'un événement (PATCH)
+PATCH {{baseUrl}}/api/events/1/
+Content-Type: application/json
+
+{
+    "description": "Séjour initial d'Alice, Bob et Chloé"
+}
+
+### 6. Supprimer un événement (DELETE)
+DELETE {{baseUrl}}/api/events/2/
