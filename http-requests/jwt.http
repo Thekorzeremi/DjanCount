@@ -1,0 +1,20 @@
+@baseUrl = http://localhost:8000
+POST {{baseUrl}}/api/token/
+Content-Type: application/json
+
+{
+    "username": "wilfrite",
+    "password": "admin25"
+}
+
+HTTP/1.1 200  - OK
+date: Thu, 27 Aug 2026 12:06:09 GMT
+server: WSGIServer/0.2 CPython/3.11.9
+content-type: application/json
+vary: Accept
+allow: POST, OPTIONS
+x-frame-options: DENY
+content-length: 489
+x-content-type-options: nosniff
+referrer-policy: same-origin
+cross-origin-opener-policy: same-origin
