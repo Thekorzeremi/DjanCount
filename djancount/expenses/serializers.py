@@ -1,9 +1,9 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
 from .models import Event, Expense
 
 
 class EventSerializer(serializers.ModelSerializer):
+
     """
     Sérialiseur pour le modèle Event.
     Gère la conversion JSON des événements et inclut des champs calculés
@@ -15,8 +15,9 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = [
-            "id", "name", "description", "participants", "participants_count", "expenses_count", "created_at"
+            "id", "name", "description", "participants", "participants_count", "expenses_count"
         ]
+        read_only_fields = ["id"]
 
 
 class ExpenseSerializer(serializers.ModelSerializer):
@@ -31,6 +32,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Expense
         fields = ["id", "title", "amount", "payer", "payer_name", "event", "event_name", "date"]
+        read_only_fields = ["id", "date"]
 
     def validate_amount(self, value):
         """
@@ -45,12 +47,15 @@ class ExpenseSerializer(serializers.ModelSerializer):
         """
         Règle de validation métier globale :
         Vérifie que le payeur fait bien partie de la liste des participants de l'événement.
+        Gère à la fois la création (POST) et la mise à jour partielle (PATCH).
         """
-        payer = attrs.get('payer')
-        event = attrs.get('event')
+        payer = attrs.get('payer', getattr(self.instance, 'payer', None))
+        event = attrs.get('event', getattr(self.instance, 'event', None))
         
         if event and payer and payer not in event.participants.all():
             raise serializers.ValidationError(
                 {"payer": "Le payeur doit faire partie des participants de cet événement."}
             )
         return attrs
+
+
