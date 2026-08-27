@@ -54,6 +54,9 @@ class EventAPITestCase(APITestCase):
         self.user_alice = User.objects.create_user(username="alice", password="password123")
         self.user_bob = User.objects.create_user(username="bob", password="password123")
 
+        # Authentification du client de test DRF
+        self.client.force_authenticate(user=self.user_alice)
+
         # Création d'un événement avec Alice et Bob comme participants
         self.event = Event.objects.create(
             name="Week-end Ski",
@@ -93,6 +96,9 @@ class ExpenseAPITestCase(APITestCase):
         self.user_alice = User.objects.create_user(username="alice", password="password123")
         self.user_bob = User.objects.create_user(username="bob", password="password123")
         self.user_chloe = User.objects.create_user(username="chloe", password="password123")
+
+        # Authentification du client de test DRF
+        self.client.force_authenticate(user=self.user_alice)
 
         # Événement "Camping" avec Alice et Bob uniquement (Chloé n'est pas participante)
         self.event_camping = Event.objects.create(name="Camping", description="Sortie forêt")
