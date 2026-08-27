@@ -1,7 +1,9 @@
+from django.db.models import Q
 from django.shortcuts import render
 from rest_framework import viewsets
 from .models import Event, Expense
 from .serializers import EventSerializer, ExpenseSerializer
+from .permissions import IsEventParticipant, IsPayerOrEventParticipant
 
 # ==============================================================================
 # 📡 VUES API REST (Membre 2 - Django REST Framework)
@@ -20,6 +22,12 @@ class EventViewSet(viewsets.ModelViewSet):
     """
     queryset = Event.objects.prefetch_related("participants", "expenses").all()
     serializer_class = EventSerializer
+    permission_classes = [IsEventParticipant]
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return self.queryset
+        return self.queryset.filter(participants=self.request.user).distinct()
 
 
 class ExpenseViewSet(viewsets.ModelViewSet):
@@ -35,6 +43,14 @@ class ExpenseViewSet(viewsets.ModelViewSet):
     """
     queryset = Expense.objects.select_related("payer", "event").all()
     serializer_class = ExpenseSerializer
+    permission_classes = [IsPayerOrEventParticipant]
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return self.queryset
+        return self.queryset.filter(
+            Q(payer=self.request.user) | Q(event__participants=self.request.user)
+        ).distinct()
 
 
 # ==============================================================================
