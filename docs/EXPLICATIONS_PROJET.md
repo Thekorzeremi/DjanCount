@@ -22,8 +22,10 @@
 13. [expenses/migrations/0001_initial.py](#13-expensesmigrations0001_initialpy)
 14. [expenses/management/commands/seed.py](#14-expensesmanagementcommandsseedpy)
 15. [expenses/templates/expenses/event_detail.html](#15-expensestemplatesexpensesevent_detailhtml)
-16. [requirements.txt](#16-requirementstxt)
-17. [Algorithme du bilan financier — Ligne par ligne](#17-algorithme-du-bilan-financier--ligne-par-ligne)
+16. [expenses/templates/expenses/home.html](#16-expensestemplatesexpenseshomehtml)
+17. [drf-spectacular (Swagger UI)](#17-drf-spectacular-swagger-ui)
+18. [requirements.txt](#18-requirementstxt)
+19. [Algorithme du bilan financier — Ligne par ligne](#19-algorithme-du-bilan-financier--ligne-par-ligne)
 
 ---
 
@@ -91,7 +93,7 @@ DjanCount/
 │       ├── apps.py               # Config de l'app
 │       ├── models.py             # Modèles de données (ORM)
 │       ├── admin.py              # Interface d'administration
-│       ├── views.py              # Vues API + Vue HTML
+│       ├── views.py              # Vues API + Vues HTML
 │       ├── urls.py               # Routage de l'app
 │       ├── serializers.py        # Sérialisation DRF
 │       ├── permissions.py        # Permissions personnalisées
@@ -104,7 +106,8 @@ DjanCount/
 │       │       └── seed.py       # Injection de données
 │       └── templates/
 │           └── expenses/
-│               └── event_detail.html  # Template HTML
+│               ├── home.html         # Page d'accueil
+│               └── event_detail.html # Bilan financier
 ├── http-requests/                # Fichiers de test API
 │   ├── jwt.http
 │   ├── events.http
@@ -269,8 +272,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'expenses',
     'rest_framework',
+    'drf_spectacular',
+    'expenses',
     'corsheaders'
 ]
 ```
@@ -283,8 +287,9 @@ INSTALLED_APPS = [
 | `django.contrib.sessions` | Gestion des sessions utilisateur | Cookies côté serveur, `request.session` |
 | `django.contrib.messages` | Système de messages flash | Messages temporaires après une action |
 | `django.contrib.staticfiles` | Servation des fichiers statiques | CSS, JS, images en développement |
-| `expenses` | Notre application métier | Modèles, vues, etc. |
 | `rest_framework` | Django REST Framework | API REST, sérialiseurs, viewsets |
+| `drf_spectacular` | Génération de documentation API | Swagger UI, schéma OpenAPI |
+| `expenses` | Notre application métier | Modèles, vues, etc. |
 | `corsheaders` | Gestion CORS | Autorise les requêtes cross-origin (frontend séparé) |
 
 **Concept Django** : Chaque app dans `INSTALLED_APPS` peut apporter ses propres modèles, templates, management commands, etc. Django les charge automatiquement.
@@ -370,6 +375,14 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'DjanCount API',
+    'DESCRIPTION': 'API REST de gestion de depensees partagees (type Tricount)',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 ```
 
@@ -379,6 +392,7 @@ REST_FRAMEWORK = {
 |---------|--------|------|
 | `DEFAULT_AUTHENTICATION_CLASSES` | `JWTAuthentication` | Les utilisateurs s'authifient avec un token JWT (pas de session) |
 | `DEFAULT_PERMISSION_CLASSES` | `IsAuthenticatedOrReadOnly` | GET = public, POST/PUT/DELETE = authentification requise |
+| `DEFAULT_SCHEMA_CLASS` | `drf_spectacular.openapi.AutoSchema` | Génère le schéma OpenAPI pour Swagger |
 
 **JWT (JSON Web Token)** : Mécanisme d'authentification stateless. L'utilisateur envoie son token dans l'en-tête `Authorization: Bearer <token>`. Pas de stockage côté serveur.
 
@@ -490,6 +504,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 ```
 
 - **`admin`** : L'interface d'administration Django.
@@ -497,6 +512,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 - **`include`** : Fonction pour déléguer des sous-chemins à une autre app.
 - **`TokenObtainPairView`** : Vue DRF qui génère un couple de tokens JWT (access + refresh).
 - **`TokenRefreshView`** : Vue DRF qui rafraîchit un access token expiré.
+- **`SpectacularAPIView`** : Vue qui génère le schéma OpenAPI en JSON/YAML.
+- **`SpectacularSwaggerView`** : Vue qui affiche l'interface Swagger UI (documentation interactive).
 
 ```python
 urlpatterns = [
@@ -504,6 +521,8 @@ urlpatterns = [
     path('', include('expenses.urls')),
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
 ```
 
@@ -513,6 +532,8 @@ urlpatterns = [
 | `''` (racine) | `expenses.urls` | Redirige tout le reste vers l'app expenses |
 | `api/token/` | `TokenObtainPairView` | `POST` avec username+password → retourne les tokens JWT |
 | `api/token/refresh/` | `TokenRefreshView` | `POST` avec refresh token → retourne un nouvel access token |
+| `api/schema/` | `SpectacularAPIView` | Génère le schéma OpenAPI brut (JSON) |
+| `api/docs/` | `SpectacularSwaggerView` | Interface Swagger UI interactive |
 
 **Concept Django** : `path('', include('expenses.urls'))` signifie "pour toute URL qui commence par la racine, passe la main au fichier `expenses/urls.py`". C'est le principe de la **décomposition par apps**.
 
@@ -996,6 +1017,22 @@ from .permissions import IsEventParticipant, IsPayerOrEventParticipant
 ```
 - Imports des modèles, sérialiseurs et permissions de l'app courante.
 
+### Vue HTML : homepage_view
+
+```python
+def homepage_view(request):
+    from .models import Event
+    events = Event.objects.prefetch_related("participants").all()
+    return render(request, 'expenses/home.html', {'events': events})
+```
+
+| Ligne | Explication |
+|-------|-------------|
+| `def homepage_view(request)` | Fonction Django classique. `request` = l'objet HTTP. |
+| `from .models import Event` | Import local (évite les imports circulaires). |
+| `Event.objects.prefetch_related("participants").all()` | Récupère tous les événements avec les participants pré-chargés (optimisation N+1). |
+| `render(request, 'expenses/home.html', {'events': events})` | Rend le template `home.html` avec la liste des événements dans le contexte. |
+
 ### EventViewSet
 
 ```python
@@ -1351,7 +1388,7 @@ Dépenses :
 ```python
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import EventViewSet, ExpenseViewSet, event_detail_view
+from .views import EventViewSet, ExpenseViewSet, event_detail_view, homepage_view
 ```
 
 ### Configuration du Router DRF
@@ -1391,6 +1428,7 @@ router.register(r'expenses', ExpenseViewSet, basename='expense')
 
 ```python
 urlpatterns = [
+    path('', homepage_view, name='homepage'),
     path('event/<int:event_id>/', event_detail_view, name='event_detail'),
     path('api/', include(router.urls)),
 ]
@@ -1398,6 +1436,7 @@ urlpatterns = [
 
 | Route | Destination | Rôle |
 |-------|-------------|------|
+| `''` (racine) | `homepage_view` | Page d'accueil avec cartes vers les événements |
 | `event/<int:event_id>/` | `event_detail_view` | Vue HTML du bilan financier |
 | `api/` | `router.urls` | Toutes les routes API REST |
 
@@ -1641,7 +1680,186 @@ python manage.py seed
 
 ---
 
-## 16. requirements.txt
+## 16. expenses/templates/expenses/home.html
+
+**Chemin** : `djancount/expenses/templates/expenses/home.html`
+**Rôle** : Page d'accueil de l'application. Affiche des cartes cliquables vers chaque événement et des liens vers l'API et le Swagger.
+
+### Structure du template
+
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>DjanCount - Gestion de depenses partagees</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #f9f9f9; }
+        h1 { color: #2c3e50; text-align: center; font-size: 2.2em; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 40px; }
+        .cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .card {
+            background: white; border-radius: 12px; padding: 30px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08); text-decoration: none;
+            color: inherit; transition: transform 0.2s, box-shadow 0.2s;
+            min-width: 280px; text-align: center;
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+        .card h2 { color: #2c3e50; margin: 0 0 10px 0; }
+        .card p { color: #7f8c8d; margin: 0 0 15px 0; }
+        .card .btn {
+            display: inline-block; background: #2c3e50; color: white;
+            padding: 10px 24px; border-radius: 6px; font-weight: bold;
+        }
+        .links { text-align: center; margin-top: 40px; }
+        .links a {
+            display: inline-block; margin: 0 10px; color: #3498db;
+            text-decoration: none; font-weight: bold;
+        }
+        .links a:hover { text-decoration: underline; }
+        .footer { text-align: center; margin-top: 50px; color: #bdc3c7; font-size: 0.9em; }
+    </style>
+</head>
+```
+
+- CSS inline avec design moderne (cartes avec ombres, hover effect).
+- Layout flexbox pour les cartes responsive.
+
+### Section Titre
+
+```html
+<body>
+    <h1>DjanCount</h1>
+    <p class="subtitle">Gestion de depensees partagees - Type Tricount</p>
+```
+
+- Titre principal de l'application.
+- Sous-titre descriptif.
+
+### Section Cartes événements
+
+```html
+    <div class="cards">
+        <a class="card" href="/event/1/">
+            <h2>Week-end a la mer</h2>
+            <p>Alice, Bob, Chloe - 3 participants</p>
+            <span class="btn">Voir le bilan</span>
+        </a>
+        <a class="card" href="/event/2/">
+            <h2>Week-end Biarritz Equipe</h2>
+            <p>Seer, Julie, Conambot, Remi - 4 participants</p>
+            <span class="btn">Voir le bilan</span>
+        </a>
+    </div>
+```
+
+- Chaque carte est un lien `<a>` cliquable vers `/event/{id}/`.
+- Contient le nom de l'événement, la liste des participants, et un bouton "Voir le bilan".
+- Effet hover : la carte se soulève légèrement (`translateY(-4px)`).
+
+### Section Liens utiles
+
+```html
+    <div class="links">
+        <a href="/api/events/">API Events</a>
+        <a href="/api/expenses/">API Expenses</a>
+        <a href="/api/docs/">Swagger UI</a>
+        <a href="/admin/">Admin Django</a>
+    </div>
+```
+
+- Liens rapides vers l'API REST, le Swagger et l'admin Django.
+- Utile pour la présentation : accès rapide à toutes les endpoints.
+
+### Footer
+
+```html
+    <p class="footer">DjanCount &copy; 2026 - Projet Django REST Framework</p>
+</body>
+</html>
+```
+
+---
+
+## 17. drf-spectacular (Swagger UI)
+
+**Chemin** : Package installé via `pip install drf-spectacular`
+**Rôle** : Génère automatiquement la documentation de l'API REST au format OpenAPI 3.0. Affiche une interface Swagger UI interactive.
+
+### Installation
+
+```bash
+pip install drf-spectacular
+```
+
+### Configuration dans settings.py
+
+```python
+INSTALLED_APPS = [
+    ...
+    'drf_spectacular',
+    ...
+]
+
+REST_FRAMEWORK = {
+    ...
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'DjanCount API',
+    'DESCRIPTION': 'API REST de gestion de depensees partagees (type Tricount)',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
+```
+
+| Setting | Rôle |
+|---------|------|
+| `DEFAULT_SCHEMA_CLASS` | Indique à DRF d'utiliser drf-spectacular pour générer le schéma |
+| `TITLE` | Titre affiché dans Swagger UI |
+| `DESCRIPTION` | Description de l'API |
+| `VERSION` | Version de l'API |
+| `SERVE_INCLUDE_SCHEMA` | `False` = ne pas servir le schéma brut via Swagger UI |
+
+### Routes dans config/urls.py
+
+```python
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+urlpatterns = [
+    ...
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+]
+```
+
+| Route | Rôle |
+|-------|------|
+| `/api/schema/` | Génère le schéma OpenAPI brut (JSON). Utilisé comme source de données par Swagger UI. |
+| `/api/docs/` | Interface Swagger UI interactive. Permet de tester les endpoints directement dans le navigateur. |
+
+### Comment ça marche
+
+1. **drf-spectacular** analyse automatiquement tous les ViewSets et Sérialiseurs du projet.
+2. Il génère un schéma OpenAPI 3.0 décrivant chaque endpoint (URL, méthode, paramètres, réponse).
+3. **Swagger UI** (`/api/docs/`) lit ce schéma et affiche une interface interactive.
+4. Sur la page Swagger, on peut :
+   - Voir tous les endpoints (GET, POST, PUT, PATCH, DELETE)
+   - Lire la description de chaque endpoint
+   - Tester les requêtes directement (bouton "Try it out")
+   - Voir les schémas des objets (Event, Expense)
+
+### Avantages pour la présentation
+
+- **Documentation auto-générée** : Pas besoin de rédiger la doc manuellement.
+- **Interactive** : On peut tester l'API en direct pendant la présentation.
+- **Professionnel** : L'interface Swagger est un standard dans l'industrie.
+- **À jour** : La doc se met à jour automatiquement quand on modifie les ViewSets.
+
+---
+
+## 18. requirements.txt
 
 **Chemin** : `requirements.txt`
 **Rôle** : Liste toutes les dépendances Python du projet.
@@ -1653,6 +1871,9 @@ django-debug-toolbar>=6.0,<8
 jupyterlab>=4.2,<5
 djangorestframework-simplejwt>=5.3,<6.0
 django-cors-headers>=4.3,<5.0
+gunicorn
+whitenoise
+drf-spectacular
 ```
 
 | Package | Version | Rôle |
@@ -1663,6 +1884,9 @@ django-cors-headers>=4.3,<5.0
 | `jupyterlab` | >=4.2,<5 | Notebook Jupyter (développement/data) |
 | `djangorestframework-simplejwt` | >=5.3,<6.0 | Authentification JWT (tokens) |
 | `django-cors-headers` | >=4.3,<5.0 | Gestion CORS (requêtes cross-origin) |
+| `gunicorn` | Dernière | Serveur WSGI de production |
+| `whitenoise` | Dernière | Sert les fichiers statiques en production |
+| `drf-spectacular` | Dernière | Génération de documentation Swagger/OpenAPI |
 
 **Notation de version** :
 - **`>=5.2,<5.3`** : Version 5.2.x uniquement (pas de 5.3+). Protège contre les breaking changes.
@@ -1675,7 +1899,7 @@ pip install -r requirements.txt
 
 ---
 
-## 17. Algorithme du bilan financier — Ligne par ligne
+## 19. Algorithme du bilan financier — Ligne par ligne
 
 > Cette section reprend l'algo de la section 11 avec encore plus de détails.
 

@@ -54,8 +54,14 @@ class ExpenseViewSet(viewsets.ModelViewSet):
 
 
 # ==============================================================================
-# 🖼️ VUE WEB HTML (Membre 4)
+# 🖼️ VUES WEB HTML
 # ==============================================================================
+
+def homepage_view(request):
+    from .models import Event
+    events = Event.objects.prefetch_related("participants").all()
+    return render(request, 'expenses/home.html', {'events': events})
+
 
 def event_detail_view(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
